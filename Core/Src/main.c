@@ -98,24 +98,28 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      char line[16];
-      printf("Reading instructions:\n. Chose note, clock or something.");
+      uint8_t line[64];
+      uint8_t line2[12];
+      strcpy((char*)line, "Reading instructions:\n. Chose note, clock or something.");
+      HAL_UART_Transmit(&huart1, line, strlen((char*)line), HAL_MAX_DELAY);
       //%*c dispose of the new line.
       // https://stackoverflow.com/questions/63621779/how-to-clear-the-content-of-a-string-which-has-already-been-used-in-c-programmin
-      scanf("%15[^\n]%*c", line);
-      printf("Your line: %s\n", line);
-      if (strcmp(line, "clock") == 0){
-          printf("You chose clock\n");
-          callClock();
-      } else if (strcmp(line, "note") == 0){
-          printf("You chose note\n");
-          callNote();
-      } else if (strcmp(line, "something") == 0){
-          printf("You chose something\n");
-          callSomething();
-      } else {
-          printf("Don't.\n");
-      }
+      HAL_UART_Receive(&huart1, line2, sizeof(line2), HAL_MAX_DELAY);
+      HAL_UART_Transmit(&huart1, line2, strlen((char*) line2), HAL_MAX_DELAY);
+      //scanf("%15[^\n]%*c", line2);
+      //printf("Your line: %s\n", line);
+      //if (strcmp(line, "clock") == 0){
+      //    printf("You chose clock\n");
+      //    callClock();
+      //} else if (strcmp(line, "note") == 0){
+      //     printf("You chose note\n");
+      //    callNote();
+      //} else if (strcmp(line, "something") == 0){
+      //    printf("You chose something\n");
+      //    callSomething();
+      //} else {
+      //    printf("Don't.\n");
+      // }
 
       memset(line, 0, sizeof(line));
 	  //strcpy((char*)buf, "UUUU");
