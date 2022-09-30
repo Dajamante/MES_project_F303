@@ -58,24 +58,6 @@ char* trimmer();
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-char* trimmer(uint8_t *buf, int len){
-	int real_length = 0;
-
-	for(int i = 0; i < len; i++){
-		if (buf[i] == '\0') {
-			real_length=i;
-			break;
-		}
-	}
-	char *trimmed = calloc((real_length), 1);
-	int j;
-	for(j = 0; j < real_length; j++){
-			trimmed[j] = buf[j];
-	}
-
-	return trimmed;
-
-}
 
 int _read(int file, char *result, size_t len){
 	HAL_StatusTypeDef status;
@@ -154,16 +136,10 @@ int main(void)
     	  command[i++] = ch;
       }
 
-      printf("Command %s", command);
-      printf("Type of command : %d\n", sizeof(command));
+      printf("Command : %s", command);
       ch ='\0';
-      command[i] = ch;
-      printf("Size of command : %d \n", sizeof(command));
-      printf("Const char command : %s \n", ((const char *) command));
+      command[i-2] = ch;
 
-      char * trimmed = trimmer(command, 12);
-      printf("Trimmed : %s \n", trimmed);
-      printf("size of trimmed %d\n", strlen(trimmed));
       //HAL_UART_Transmit(&huart1, response, 12, HAL_MAX_DELAY);
       //HAL_UART_Receive_IT(&huart1, response, 1);
       //%*c dispose of the new line.
@@ -177,13 +153,13 @@ int main(void)
       //HAL_UART_Transmit(&huart1, command, strlen((char*) command), HAL_MAX_DELAY);
       //scanf("%15[^\n]%*c", line2);
       //printf("Your line: %s\n", line);
-      if (strcmp(trimmed, "clock") == 0){
+      if (strcmp((char *) command, "clock") == 0){
           printf("You chose clock\n");
           callClock();
-      } else if (strcmp(trimmed, "note") == 0){
+      } else if (strcmp((char *) command, "note") == 0){
             printf("You chose note\n");
            callNote();
-       } else if (strcmp(trimmed, "something") == 0){
+       } else if (strcmp((char *) command, "something") == 0){
            printf("You chose something\n");
            callSomething();
        } else {
@@ -192,7 +168,6 @@ int main(void)
 
       //memset(line, 0, sizeof(line));
       //memset(line, 0, sizeof(response));
-      memset(trimmed, 0, strlen(trimmed));
       memset(command, 0, sizeof(command));
 
 	  //strcpy((char*)buf, "UUUU");
