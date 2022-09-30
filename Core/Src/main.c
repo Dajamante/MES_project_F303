@@ -52,11 +52,54 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+char* trimmer();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+char* trimmer(uint8_t *buf, int len){
+	int real_length = 0;
+
+	for(int i = 0; i < len; i++){
+		if (buf[i] == '\0') {
+			real_length=i;
+			break;
+		}
+	}
+	char *trimmed = calloc((real_length), 1);
+	int j;
+	for(j = 0; j < real_length; j++){
+			trimmed[j] = buf[j];
+	}
+
+	return trimmed;
+
+}
+
+int _read(int file, char *result, size_t len){
+	HAL_StatusTypeDef status;
+
+	int retcode = 0;
+
+	if (len != 0){
+		status = HAL_UART_Receive(&huart1, (uint8_t *) result, len, HAL_MAX_DELAY);
+
+		if (status == HAL_OK){
+
+			retcode = len;
+		} else {
+			retcode = -1;
+		}
+	}
+
+	return retcode;
+}
+
+int _write(int file, char *outgoing, int len){
+	HAL_UART_Transmit(&huart1, (uint8_t*) outgoing, len, 100);
+	return len;
+}
 
 /* USER CODE END 0 */
 
@@ -67,8 +110,7 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	//uint8_t buf[12];
-
+	int ch;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -91,6 +133,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+  setvbuf(stdin, NULL, _IONBF, 0);
 
   /* USER CODE END 2 */
 
@@ -98,30 +141,60 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      uint8_t line[64];
-      uint8_t line2[12];
-      strcpy((char*)line, "Reading instructions:\n. Chose note, clock or something.");
-      HAL_UART_Transmit(&huart1, line, strlen((char*)line), HAL_MAX_DELAY);
+      //uint8_t line[64];
+      //uint8_t response[12] = {'\0'};
+      uint8_t command[12] = {'\0'};
+
+      //strcpy((char*)line, "Reading instructions:\n. Chose note, clock or something.");
+      printf("Reading instructions: chose note, clock or something.\n");
+
+      int i = 0;
+      while((ch !='\n') && (ch = getchar())){
+    	  printf("%c", ch);
+    	  command[i++] = ch;
+      }
+
+      printf("Command %s", command);
+      printf("Type of command : %d\n", sizeof(command));
+      ch ='\0';
+      command[i] = ch;
+      printf("Size of command : %d \n", sizeof(command));
+      printf("Const char command : %s \n", ((const char *) command));
+
+      char * trimmed = trimmer(command, 12);
+      printf("Trimmed : %s \n", trimmed);
+      printf("size of trimmed %d\n", strlen(trimmed));
+      //HAL_UART_Transmit(&huart1, response, 12, HAL_MAX_DELAY);
+      //HAL_UART_Receive_IT(&huart1, response, 1);
       //%*c dispose of the new line.
       // https://stackoverflow.com/questions/63621779/how-to-clear-the-content-of-a-string-which-has-already-been-used-in-c-programmin
-      HAL_UART_Receive(&huart1, line2, sizeof(line2), HAL_MAX_DELAY);
-      HAL_UART_Transmit(&huart1, line2, strlen((char*) line2), HAL_MAX_DELAY);
+      //while (response[0] != '\n'){
+      //	  command[i++] = response[0];
+      //}
+      // Null terminate the string
+      //command[i] ='\0';
+
+      //HAL_UART_Transmit(&huart1, command, strlen((char*) command), HAL_MAX_DELAY);
       //scanf("%15[^\n]%*c", line2);
       //printf("Your line: %s\n", line);
-      //if (strcmp(line, "clock") == 0){
-      //    printf("You chose clock\n");
-      //    callClock();
-      //} else if (strcmp(line, "note") == 0){
-      //     printf("You chose note\n");
-      //    callNote();
-      //} else if (strcmp(line, "something") == 0){
-      //    printf("You chose something\n");
-      //    callSomething();
-      //} else {
-      //    printf("Don't.\n");
-      // }
+      if (strcmp(trimmed, "clock") == 0){
+          printf("You chose clock\n");
+          callClock();
+      } else if (strcmp(trimmed, "note") == 0){
+            printf("You chose note\n");
+           callNote();
+       } else if (strcmp(trimmed, "something") == 0){
+           printf("You chose something\n");
+           callSomething();
+       } else {
+           printf("Don't.\n");
+      }
 
-      memset(line, 0, sizeof(line));
+      //memset(line, 0, sizeof(line));
+      //memset(line, 0, sizeof(response));
+      memset(trimmed, 0, strlen(trimmed));
+      memset(command, 0, sizeof(command));
+
 	  //strcpy((char*)buf, "UUUU");
 	  //HAL_UART_Transmit(&huart1, buf, strlen((char*)buf), HAL_MAX_DELAY);
 	  //HAL_Delay(500);
@@ -180,6 +253,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
 
 /* USER CODE END 4 */
 
